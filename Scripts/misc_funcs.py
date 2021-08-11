@@ -480,6 +480,7 @@ def semantic_crp(data, LSA=get_w2v(), typ='W2V', bin_num=10, savename=''):
     
     plt_std_graph(plot, savename + typ + 'sem_crp')
     
+    
 def get_flat_irts_lags_and_sims(data):
     import numpy as np
     w2v = get_w2v()
@@ -522,8 +523,8 @@ def new_spc(recalls):
     from matplotlib import pyplot as plt
     spc = np.asarray([recalls[recalls==i].size 
         for i in range(1,recalls.max()+1)])/float(recalls.shape[0])
-    plt.plot(spc)  
-  
+    plt.plot(spc)
+    
 def lag_av_sim(data, minLag=-23, maxLag=23):
     import numpy as np
     import os
