@@ -15,7 +15,10 @@ irt_lags = 2
 min_irt = irt_lags + 1
 beh_path = '/data/eeg/scalp/ltp/ltpFR2/behavioral/data/'
 w2v_path = '/home1/shai.goldman/IRT_git/Scripts/Resources/w2v.mat'
-w2v = sio.loadmat(w2v_path)['w2v']
+try:
+    w2v = sio.loadmat(w2v_path)['w2v']
+except FileNotFoundError:
+    print('No w2v was able to load')
 data_keys = ['subject', 'session', 'good_trial', 'pres_words',
              'pres_nos', 'rec_words', 'rec_nos', 'recalled',
              'times', 'intrusions', 'recalls', 'lag', 'irt',
