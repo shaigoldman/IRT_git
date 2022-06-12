@@ -87,9 +87,9 @@ def fit_model(flat_data):
     return model.fit()
 
 
-def get_model(filename=None, subject=None, **kwargs):
+def get_model(filename=None, subject=None, model_num=None, **kwargs):
     data = db.load_detailed_data(subject=subject, path=filename, **kwargs)
-    flat_data = prep_data_for_ols(data)
+    flat_data = prep_data_for_ols(data, model_num=model_num)
     return fit_model(flat_data)
 
 
