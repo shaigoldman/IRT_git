@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
@@ -9,8 +8,20 @@ from tqdm.notebook import tqdm
 import DataBuild as db
 
 
-def prep_data_for_ols(data, normalize=True, model_num=None):
-    # prepare data for OLS modeling by flattening it
+def prep_data_for_ols(data, normalize=True, model_num=None, **kwargs):
+    """ Prepare data for OLS modeling by flattening it,
+        running the equations on it (e.g., OP=1/(LL-OP))
+        and normalizing it if desired.
+        
+        'model_num' can be 1,2, or 3, depending on which model
+        from the paper we are working with.
+        
+        Note: kwargs is unused here, it is only to allow
+        for using the same kwargs in this func and in DataBuild
+        functions.
+    """
+    
+    
     
     #-----flatten data----#
     flat_data = {}
@@ -18,12 +29,12 @@ def prep_data_for_ols(data, normalize=True, model_num=None):
         if len(data[key].shape) > 1:
             flat_data[key] = data[key].values.flatten()
         else:
-            flat_data[key] = np.repeat(data[key], db.ll).values.flatten()
+            flat_data[key] = np.repeat(data[key], db.LL).values.flatten()
 
     flat_data = pd.DataFrame(flat_data)
     
     # include output pos as a variable
-    flat_data['output_pos'] = np.repeat([db.outputs], db.nlist, axis=0).flatten()
+    flat_data['output_pos'] = np.repeat([db.OUTPT_PSTNS], db.NLIST, axis=0).flatten()
 
     #-----filter data----#
     # remove keys that wont go into the model
@@ -50,9 +61,9 @@ def prep_data_for_ols(data, normalize=True, model_num=None):
     #----adjust some variables for the model----#
     # output position is inverted
     flat_data['output_pos'] = flat_data['output_pos'].astype(float)
-    flat_data['output_pos'] = (db.ll-flat_data['output_pos']) ** -1
+    flat_data['output_pos'] = (db.LL-flat_data['output_pos']) ** -1
     # total recalls is normalized
-    flat_data['total_recalls'] /= db.ll
+    flat_data['total_recalls'] /= db.LL
     # lag is taken as ln(|lag|)
     flat_data['lag'] = np.log(np.abs(flat_data['lag']))
     
@@ -79,6 +90,7 @@ def prep_data_for_ols(data, normalize=True, model_num=None):
 
 
 def fit_model(flat_data):
+    """Fits an OLS model to flattened data."""
     flat_data = flat_data.copy()
     X = sm.add_constant(flat_data)
     y = X.pop('irt')
@@ -88,8 +100,12 @@ def fit_model(flat_data):
 
 
 def get_model(filename=None, subject=None, **kwargs):
+    """ Loads data, flattens it, and fits a model to it.
+        Can be used either by giving the file path, or
+        subject ID.
+    """
     data = db.load_detailed_data(subject=subject, path=filename, **kwargs)
-    flat_data = prep_data_for_ols(data)
+    flat_data = prep_data_for_ols(data, **kwargs)
     return fit_model(flat_data)
 
 
